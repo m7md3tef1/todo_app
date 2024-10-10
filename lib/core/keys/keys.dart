@@ -6,6 +6,7 @@ enum SharedKeys {
   admin,
   roomId,
   shareId,
+  refreshToken,
   customer,
   userId,
   isLogin,

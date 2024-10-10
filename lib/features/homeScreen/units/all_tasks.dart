@@ -1,87 +1,208 @@
 part of '../view.dart';
 
-class AllTasks extends StatelessWidget {
+class AllTasks extends StatefulWidget {
   const AllTasks({super.key});
 
   @override
+  State<AllTasks> createState() => _AllTasksState();
+}
+
+class _AllTasksState extends State<AllTasks> {
+  var all;
+  List<Tasks> _foundUsers = [];
+  @override
+  void initState() {
+    _foundUsers = TasksCubit.get(context).listTasks;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: 4,
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      scrollDirection: Axis.vertical,
-      padding: EdgeInsetsDirectional.zero,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: EdgeInsets.only(bottom: 8.h, top: 5.h),
-          child: InkWell(
-            onTap: () {
-              MagicRouter.navigateTo(const TaskDetails());
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                  Image(image: const AssetImage(AppImages.taskImage),height: 64.h,width: 64.w,fit: BoxFit.fill,),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
+    return BlocConsumer<TasksCubit, TasksState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        if(state is GetTasksSuccess){
+          print('object');
+          _foundUsers = TasksCubit.get(context).listTasks;
+        }
+        return
+          _foundUsers.isEmpty?Center(
+            child: CustomText(text: 'Not Found Tasks Yet'),
+          ):
+          NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.pixels ==
+                    notification.metrics.maxScrollExtent &&
+                notification is ScrollUpdateNotification) {
+              TasksCubit.get(context).getTasks(context, fromLoading: true);
+            }
+            return true;
+          },
+          child: ListView.builder(
+            itemCount: _foundUsers.length,
+            shrinkWrap: true,
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            padding: EdgeInsetsDirectional.zero,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 8.h, top: 5.h),
+                child: InkWell(
+                  onTap: () {
+                    MagicRouter.navigateTo(TaskDetails(
+                        _foundUsers[index].title,
+                        _foundUsers[index].image,
+                        _foundUsers[index].desc,
+                        _foundUsers[index].createdAt.toString().split('T')[0],
+                        _foundUsers[index].priority,
+                        _foundUsers[index].status));
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: CustomText(
-                                text: 'Grocery Shopping App',
-                                fontWeight: FontWeight.w700,
-                                line: 1,
-                                fontSize: 16.sp,
-                                color: Colors.black),
-                          ),
-                          CustomText(
-                              text: 'Waiting',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.sp,
-                              color: const Color(0xFFFF7D53)),
-                        ],
-                      ),
-                      CustomText(
-                          text:
-                              'This application is designed for super shops. By using this application they can enlist all their products in one place and can deliver. Customers will get a one-stop solution for their daily shopping.',
-                          fontWeight: FontWeight.w400,
-                          line: 1,
-                          fontSize: 14.sp,
-                          color: const Color(0xFF24252C).withOpacity(.6)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.flag,
-                                    color: ColorManager.backgroundColor),
-                                CustomText(
-                                    text: 'Medium',
-                                    fontWeight: FontWeight.w500,
-                                    line: 1,
-                                    fontSize: 12.sp,
-                                    color: ColorManager.backgroundColor),
-                              ],
+                      CachedNetworkImage(
+                        imageUrl: _foundUsers[index].image.toString(),
+                        imageBuilder: (context, imageProvider) => Container(
+                          width: 64.w,
+                          height:
+                              64.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10.r),
+                            image: DecorationImage(
+                              image: imageProvider,
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          CustomText(
-                              text: '30/12/2022',
-                              fontWeight: FontWeight.w400,
-                              fontSize: 12.sp,
-                              color: const Color(0xFF24252C).withOpacity(.6)),
-                        ],
+                        ),
+                        placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                          color: ColorManager.backgroundColor,
+                        )),
+                        errorWidget: (context, url, error) =>
+                            const Center(child: Icon(Icons.error)),
                       ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: CustomText(
+                                      text: _foundUsers[index].title.toString(),
+                                      fontWeight: FontWeight.w700,
+                                      line: 1,
+                                      fontSize: 16.sp,
+                                      color: Colors.black),
+                                ),
+                                CustomText(
+                                    text: _foundUsers[index].status.toString(),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 12.sp,
+                                    color:
+                                        _foundUsers[index].status.toString() ==
+                                                    "Waiting" ||
+                                                _foundUsers[index]
+                                                        .status
+                                                        .toString() ==
+                                                    "waiting"
+                                            ? const Color(0xFFFF7D53)
+                                            : _foundUsers[index]
+                                                            .status
+                                                            .toString() ==
+                                                        "Inprogress" ||
+                                                    _foundUsers[index]
+                                                            .status
+                                                            .toString() ==
+                                                        "InProgress"
+                                                ? ColorManager.backgroundColor
+                                                : const Color(0xFF0087FF)),
+                              ],
+                            ),
+                            CustomText(
+                                text: _foundUsers[index].desc.toString(),
+                                fontWeight: FontWeight.w400,
+                                line: 1,
+                                fontSize: 14.sp,
+                                color: const Color(0xFF24252C).withOpacity(.6)),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.flag,
+                                          color: _foundUsers[index]
+                                                          .priority
+                                                          .toString() ==
+                                                      'Medium' ||
+                                                  _foundUsers[index]
+                                                          .priority
+                                                          .toString() ==
+                                                      'medium'
+                                              ? ColorManager.backgroundColor
+                                              : _foundUsers[index]
+                                                              .priority
+                                                              .toString() ==
+                                                          'Low' ||
+                                                      _foundUsers[index]
+                                                              .priority
+                                                              .toString() ==
+                                                          'low'
+                                                  ? const Color(0xFF0087FF)
+                                                  : const Color(0xFFFF7D53)),
+                                      CustomText(
+                                          text: _foundUsers[index]
+                                              .priority
+                                              .toString(),
+                                          fontWeight: FontWeight.w500,
+                                          line: 1,
+                                          fontSize: 12.sp,
+                                          color: _foundUsers[index]
+                                                          .priority
+                                                          .toString() ==
+                                                      'Medium' ||
+                                                  _foundUsers[index]
+                                                          .priority
+                                                          .toString() ==
+                                                      'medium'
+                                              ? ColorManager.backgroundColor
+                                              : _foundUsers[index]
+                                                              .priority
+                                                              .toString() ==
+                                                          'Low' ||
+                                                      _foundUsers[index]
+                                                              .priority
+                                                              .toString() ==
+                                                          'low'
+                                                  ? const Color(0xFF0087FF)
+                                                  : const Color(0xFFFF7D53)),
+                                    ],
+                                  ),
+                                ),
+                                CustomText(
+                                    text: _foundUsers[index]
+                                        .createdAt
+                                        .toString()
+                                        .split('T')[0],
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 12.sp,
+                                    color: const Color(0xFF24252C)
+                                        .withOpacity(.6)),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      const Icon(Icons.more_vert_outlined)
                     ],
                   ),
                 ),
-                SizedBox(width: 12.w),
-                const Icon(Icons.more_vert_outlined)
-              ],
-            ),
+              );
+            },
           ),
         );
       },

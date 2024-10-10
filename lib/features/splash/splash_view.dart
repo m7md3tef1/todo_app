@@ -4,8 +4,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:project/core/app_images/app_images.dart';
 import 'package:project/core/color_manager/color_manager.dart';
+import 'package:project/features/homeScreen/view.dart';
+import '../../core/const/utils.dart';
 import '../introduction/view.dart';
-import '../layout/layout.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -25,7 +26,7 @@ class SplashScreen extends StatelessWidget {
             splash: Image.asset(AppImages.logo,
                 fit: BoxFit.contain, height: 45.h, width: 124.w),
             animationDuration: const Duration(milliseconds: 3000),
-            nextScreen: const ViewIntro(),
+            nextScreen: token == '' ?const ViewIntro():const HomeScreen(),
             // splashTransition: SplashTransition.fadeTransition,
             backgroundColor: ColorManager.backgroundColor));
   }

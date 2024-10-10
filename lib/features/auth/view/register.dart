@@ -1,22 +1,28 @@
 import 'package:country_code_picker/country_code_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:project/features/auth/cubit/todo_app_cubit.dart';
+import 'package:project/features/layout/todo_app_cubit.dart';
 import 'package:project/features/auth/view/login.dart';
 import '../../../core/app_images/app_images.dart';
 import '../../../core/color_manager/color_manager.dart';
 import '../../../core/router/router.dart';
-import '../../../core/validator/validator.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../../../core/widgets/custom_text.dart';
-import '../../../core/widgets/customtextform2.dart';
+import '../../../core/widgets/customtextform.dart';
 import '../cubit/auth_cubit.dart';
 
 // ignore: must_be_immutable
-class TodoAppRegister extends StatelessWidget {
-  TodoAppRegister({super.key});
+class TodoAppRegister extends StatefulWidget {
+  const TodoAppRegister({super.key});
+
+  @override
+  State<TodoAppRegister> createState() => _TodoAppRegisterState();
+}
+
+class _TodoAppRegisterState extends State<TodoAppRegister> {
   var formKey = GlobalKey<FormState>();
   var phoneController = TextEditingController();
   var yearsController = TextEditingController();
@@ -25,7 +31,8 @@ class TodoAppRegister extends StatelessWidget {
   var addressController = TextEditingController();
   var nameController = TextEditingController();
   final TextEditingController _countryController = TextEditingController();
-  var code;
+  var code = "+20";
+  List<String>? nameLevel = ["senior", "fresh", "junior", "midLevel"];
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -82,7 +89,6 @@ class TodoAppRegister extends StatelessWidget {
                                             controller: nameController,
                                             title: 'Name',
                                             hint: 'Name',
-                                            label: '',
                                             validator: (String? value) {
                                               if (value!.isEmpty) {
                                                 return '⚠️  ${'Please enter name'}';
@@ -113,14 +119,13 @@ class TodoAppRegister extends StatelessWidget {
                                               onChanged: (country) {
                                                 _countryController.text =
                                                     country.name ?? '';
-                                                code = country.dialCode;
+                                                code = country.dialCode!;
                                               },
-                                              initialSelection: 'BD',
+                                              initialSelection: 'EG',
                                               showFlag: true,
                                               showDropDownButton: true,
                                               alignLeft: false,
                                             ),
-                                            label: '',
                                             validator: (String? value) {
                                               if (value!.isEmpty) {
                                                 return '⚠️  ${'Please enter phone'}';
@@ -140,7 +145,6 @@ class TodoAppRegister extends StatelessWidget {
                                             controller: yearsController,
                                             title: 'Years',
                                             hint: 'Years of experience',
-                                            label: '',
                                             validator: (String? value) {
                                               if (value!.isEmpty) {
                                                 return '⚠️  ${'Please enter years of experience'}';
@@ -151,31 +155,82 @@ class TodoAppRegister extends StatelessWidget {
                                             icondata: const SizedBox(),
                                             secure: false),
                                         SizedBox(height: 10.h),
-                                        CustomTextFormField(
-                                            auto: AutovalidateMode
-                                                .onUserInteraction,
-                                            TextInputAction:
-                                            TextInputAction.next,
-                                            type: TextInputType.phone,
-                                            controller: levelController,
-                                            enable: false,
-                                            title: 'Choose experience Level',
-                                            suffix: Icon(
-                                              Icons
-                                                  .keyboard_arrow_down_outlined,
-                                              size: 25.w,
-                                            ),
-                                            hint: 'Choose experience Level',
-                                            label: 'Choose experience Level',
-                                            validator: (String? value) {
-                                              if (value!.isEmpty) {
-                                                return '⚠️  ${'Please enter phone'}';
-                                              } else {
-                                                return null;
-                                              }
-                                            },
-                                            icondata: const SizedBox(),
-                                            secure: false),
+                                        DropdownButtonFormField(
+                                            itemHeight: 100.h,
+                                            decoration: InputDecoration(
+                                                errorStyle: TextStyle(
+                                                    fontFamily: 'tj',
+                                                    color: Colors.red,
+                                                    fontSize: ScreenUtil().orientation == Orientation.landscape
+                                                        ? 10.sp
+                                                        : 12.sp),
+                                                contentPadding:
+                                                    EdgeInsetsDirectional.fromSTEB(
+                                                        15.w, 10.h, 15.w, 10.h),
+                                                hintStyle: TextStyle(
+                                                    color:
+                                                        const Color(0xFFD6D6D6),
+                                                    fontSize: 14.sp,
+                                                    fontWeight:
+                                                        FontWeight.w400),
+                                                enabledBorder: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(
+                                                        10.r),
+                                                    borderSide: const BorderSide(
+                                                        color:
+                                                            Color(0xFFBABABA),
+                                                        width: 1)),
+                                                disabledBorder: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(10.r),
+                                                    borderSide: const BorderSide(color: Color(0xFFBABABA), width: 1)),
+                                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.r), borderSide: const BorderSide(color: Color(0xFFBABABA), width: 1)),
+                                                suffixIconColor: const Color(0xFFBABABA)),
+                                            borderRadius: BorderRadius.circular(10.r),
+                                            style: TextStyle(fontFamily: 'tj', color: const Color(0xFF2E2B2B), fontWeight: FontWeight.w600, fontSize: ScreenUtil().orientation == Orientation.landscape ? 8.sp : 16.sp),
+                                            hint: CustomText(text: levelController.text.isEmpty ? 'Choose experience Level' : levelController.text.toString(), color: const Color(0xFF2F2F2F), fontSize: 14.sp, fontWeight: levelController.text.isEmpty ? FontWeight.w400 : FontWeight.w600),
+                                            icon: Icon(Icons.keyboard_arrow_down_outlined, size: 25.w),
+                                            isExpanded: true,
+                                            items: <DropdownMenuItem<String>>[
+                                              DropdownMenuItem(
+                                                  enabled: false,
+                                                  value: 'nameLevel',
+                                                  child: ListView.builder(
+                                                    itemCount:
+                                                        nameLevel!.length,
+                                                    shrinkWrap: true,
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return InkWell(
+                                                        onTap: () async {
+                                                          setState(() {
+                                                            levelController
+                                                                    .text =
+                                                                nameLevel![
+                                                                    index];
+                                                            MagicRouter.pop();
+                                                          });
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(5.0),
+                                                          child: CustomText(
+                                                              text: nameLevel![
+                                                                  index],
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 14.sp,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ))
+                                            ],
+                                            onChanged: (newValue) {
+                                              levelController.text = newValue!;
+                                            }),
                                         SizedBox(height: 10.h),
                                         CustomTextFormField(
                                             auto: AutovalidateMode
@@ -186,7 +241,6 @@ class TodoAppRegister extends StatelessWidget {
                                             controller: addressController,
                                             title: 'Address',
                                             hint: 'Address',
-                                            label: '',
                                             validator: (String? value) {
                                               if (value!.isEmpty) {
                                                 return '⚠️  ${'Please enter address'}';
@@ -214,7 +268,6 @@ class TodoAppRegister extends StatelessWidget {
                                                   TodoAppCubit.get(context)
                                                       .changePasswordVisibility();
                                                 }),
-                                            label: '',
                                             validator: (String? value) {
                                               if (value!.isEmpty) {
                                                 return '⚠️  ${'Please enter password'}';
@@ -224,18 +277,30 @@ class TodoAppRegister extends StatelessWidget {
                                             },
                                             icondata: const SizedBox(),
                                             secure: TodoAppCubit.get(context)
-                                                .oldPassword)
+                                                .isPassword)
                                       ],
                                     ),
                                   ),
                                 ],
                               ),
                               SizedBox(height: 24.h),
-                              CustomButton(
-                                  text: 'Sign Up',
-                                  function: () {
-                                    // MagicRouter.navigateAndPopAll(const TodoAppLogin());
-                                  }),
+                              state is SignUpLoading
+                                  ? const Center(
+                                      child: CircularProgressIndicator(
+                                          color: ColorManager.backgroundColor))
+                                  : CustomButton(
+                                      text: 'Sign Up',
+                                      function: () {
+                                        if (formKey.currentState!.validate()) {
+                                          AuthCubit.get(context).signUp(
+                                              context, code + phoneController.text,
+                                              passwordController.text,
+                                              nameController.text,
+                                              yearsController.text,
+                                              addressController.text,
+                                              levelController.text);
+                                        }
+                                      }),
                               SizedBox(height: 15.h),
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,

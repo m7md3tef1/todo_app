@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:project/core/color_manager/color_manager.dart';
 
 showToast(
     {required String msg,
@@ -22,7 +23,7 @@ Color chooseToastColor(ToastedStates states) {
   Color color;
   switch (states) {
     case ToastedStates.SUCCESS:
-      color = const Color(0xFFFB990D).withOpacity(.8);
+      color = ColorManager.backgroundColor;
       break;
     case ToastedStates.ERROR:
       color = Colors.red;

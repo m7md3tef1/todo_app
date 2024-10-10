@@ -54,6 +54,16 @@ dependencies:
   shimmer: ^3.0.0
   fluttertoast: ^8.2.4
   country_code_picker: ^3.0.0
+  easy_localization: ^3.0.7
+
+  flutter_launcher_icons: ^0.9.3
+
+
+flutter_launcher_icons:
+  android: true
+  image_path_android: "assets/images/logo.png"
+  ios: true
+  image_path_ios: "assets/images/logo.png"
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +90,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
+    - translations/en.json
+    - translations/ar.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

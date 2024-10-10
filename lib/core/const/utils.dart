@@ -1,4 +1,5 @@
 String? token = '';
+String? refreshToken = '';
 String? id = '';
 String? shareId = '';
 var roomId = '';

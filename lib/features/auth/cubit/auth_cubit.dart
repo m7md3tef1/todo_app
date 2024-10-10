@@ -1,17 +1,21 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:project/features/homeScreen/cubit/tasks_cubit.dart';
 
 import '../../../core/const/utils.dart';
 import '../../../core/data/api/api.dart';
 import '../../../core/data/local/cacheHelper.dart';
 import '../../../core/dialoges/toast.dart';
 import '../../../core/keys/keys.dart';
+import '../../../core/models/UserDetail.dart';
 import '../../../core/router/router.dart';
-import '../cubit/todo_app_cubit.dart';
+import '../../homeScreen/view.dart';
+import '../../layout/todo_app_cubit.dart';
 import '../view/login.dart';
 
 part 'auth_state.dart';
@@ -19,12 +23,12 @@ part 'auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(LoginInitial());
   static AuthCubit get(context) => BlocProvider.of(context);
-
+  Connectivity connectivity = Connectivity();
   IconData suffix = Icons.visibility_off_outlined;
   bool isPassword = true;
   bool value = true;
   bool socialAuth = false;
-  Connectivity connectivity = Connectivity();
+
   void changePasswordVisibility() {
     isPassword = !isPassword;
     suffix =
@@ -32,8 +36,8 @@ class AuthCubit extends Cubit<AuthState> {
     emit(SelfLabChangePasswordVisibilityState());
   }
 
-  var phone;
-  signIn(email, password, deviceType, deviceId, context) async {
+  var loginData;
+  signIn(phone, password, context) async {
     emit(SignInLoading());
     connectivity.checkConnectivity().then((value) async {
       if (ConnectivityResult.none == value) {
@@ -42,35 +46,37 @@ class AuthCubit extends Cubit<AuthState> {
             msg: 'Check your internet connection and try again',
             state: ToastedStates.WARNING);
       } else {
-        var response = Api().postHttpLogin(url: 'sign-in', data: {
-          'email': email,
-          'password': password,
-          'device_type': deviceType,
-          'device_id': deviceId
-        });
+        var response = Api().postHttp(context,
+            url: 'auth/login',
+            data: jsonEncode({'phone': phone, 'password': password}));
         response
             .then((value) async => {
-                  TodoAppCubit.get(context).pageIndex = 0,
+                  loginData = value,
                   CacheHelper.putString(
-                      SharedKeys.token, value['data']['token']),
+                      SharedKeys.refreshToken, value["refresh_token"]),
+                  refreshToken = CacheHelper.getString(SharedKeys.refreshToken),
+                  CacheHelper.putString(
+                      SharedKeys.token, value["access_token"]),
                   token = CacheHelper.getString(SharedKeys.token),
                   emit(SignInSuccess(register: value)),
-                  await getUserData(),
+                  await getUserData(context),
                   showToast(
                       msg: 'Login Successfully', state: ToastedStates.SUCCESS),
-                  CacheHelper.putString(
-                      SharedKeys.email, value['data']['email']),
-                  email1 = CacheHelper.getString(SharedKeys.email),
+                  MagicRouter.navigateAndPopAll(const HomeScreen()),
                 })
             .onError((error, stackTrace) => {
                   print(error),
+                  showToast(
+                      msg: 'يوجد خطأ في رقم الهاتف أو كلمة المرور',
+                      state: ToastedStates.WARNING),
                   emit(SignInFailed(error: error.toString())),
                 });
       }
     });
   }
 
-  signUp(userModel) async {
+  signUp(context, phone, password, displayName, experienceYears, address,
+      level) async {
     emit(SignUpLoading());
     connectivity.checkConnectivity().then((value) async {
       if (ConnectivityResult.none == value) {
@@ -79,27 +85,32 @@ class AuthCubit extends Cubit<AuthState> {
             msg: 'Check your internet connection and try again',
             state: ToastedStates.WARNING);
       } else {
-        var response = Api().postHttp(url: 'sign-up', data: userModel);
+        var response = Api().postHttpRegister(context,
+            url: 'auth/register',
+            data: jsonEncode({
+              'phone': phone,
+              'password': password,
+              'displayName': displayName,
+              'experienceYears': experienceYears,
+              'address': address,
+              'level': level
+            }));
         response
             .then((value) => {
                   emit(SignUpSuccess()),
                   showToast(
-                      msg: value['message'], state: ToastedStates.SUCCESS),
+                      msg: 'تم التسجيل بنجاح', state: ToastedStates.SUCCESS),
+                  MagicRouter.navigateTo(TodoAppLogin()),
                 })
             .onError((error, stackTrace) => {
                   print(error),
                   emit(SignUpFailed(error: error.toString())),
-                  if (error.toString().contains('needActive'))
-                    {
-                      showToast(
-                          msg: 'Your Account Is Not Active',
-                          state: ToastedStates.ERROR),
-                    }
-                  else
-                    showToast(
-                        msg: error.toString().split(', errors:')[0].replaceAll(
-                            'Exception: {status: false, message:', ''),
-                        state: ToastedStates.ERROR),
+                  showToast(
+                      msg: error
+                          .toString()
+                          .split(', error:')[0]
+                          .replaceAll('Exception: {message:', ''),
+                      state: ToastedStates.ERROR),
                 });
       }
     });
@@ -114,40 +125,43 @@ class AuthCubit extends Cubit<AuthState> {
             msg: 'Check your internet connection and try again',
             state: ToastedStates.WARNING);
       } else {
-        var response = Api().deleteHttp(
-            url: 'sign-out', authToken: token, data: {'device_id': id});
+        var response = Api().postHttpRegister(context,
+            url: 'auth/logout', data: jsonEncode({"token": "${token}"}));
         response
             .then((value) async => {
                   MagicRouter.navigateAndPopAll(TodoAppLogin()),
+                  TasksCubit.get(context).listTasks.clear(),
+                  TasksCubit.get(context).listTasks = [],
+                  TasksCubit.get(context).listTasks == null,
                   emit(LogoutSuccess()),
                   showToast(
                       msg: 'Logout Successfully', state: ToastedStates.SUCCESS),
                   token = '',
                   token = CacheHelper.putString(SharedKeys.token, ''),
+                  MagicRouter.navigateAndPopAll(TodoAppLogin()),
                 })
             .onError((error, stackTrace) => {
+                  print(error),
                   emit(LogoutFailed(error.toString())),
                 });
       }
     });
   }
 
-  // Users? GetUserDataModel;
-  Future<void> getUserData() async {
+  UserDetail? getUserDataModel;
+  Future<void> getUserData(context) async {
     emit(GetUserDataLoading());
     connectivity.checkConnectivity().then((value) async {
       if (ConnectivityResult.none == value) {
         emit(NetworkFailed("Check your internet connection and try again"));
       } else if (token == '' || token == null) {
       } else {
-        var response = Api().getHttp(
-          url: 'profile',
-          authToken: token,
-        );
+        var response =
+            Api().getHttp(context, url: 'auth/profile', authToken: token);
         response
             .then((value) => {
-                  // GetUserDataModel =  Users.fromJson(value['data']['user']),
-                  emit(GetUserDataSuccess(value['data']['user'])),
+                  getUserDataModel = UserDetail.fromJson(value),
+                  emit(GetUserDataSuccess(value)),
                 })
             .onError((error, stackTrace) => {
                   emit(GetUserDataFailed(error)),
@@ -157,7 +171,7 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   // Users profileData2 =Users();
-  updateProfile(name, email, phone, image) async {
+  updateTask(context, name, email, phone, image) async {
     connectivity.checkConnectivity().then((value) async {
       if (ConnectivityResult.none == value) {
         emit(NetworkFailed("Check your internet connection and try again"));
@@ -184,7 +198,7 @@ class AuthCubit extends Cubit<AuthState> {
         }
 
         var token = await CacheHelper.getString(SharedKeys.token);
-        var response = Api().postHttp(
+        var response = Api().postHttpRegister(context,
             url: 'update-profile?_method=patch',
             data: formData,
             authToken: token);
