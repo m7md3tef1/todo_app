@@ -2,7 +2,7 @@ part of '../view.dart';
 
 // ignore: must_be_immutable
 class Body extends StatefulWidget {
-    Body( this.title, this.image, this.desc, this.date, this.priority, this.status,
+  Body(this.title, this.image, this.desc, this.date, this.priority, this.status,
       {super.key});
   String? title;
   String? image;
@@ -19,13 +19,21 @@ class _BodyState extends State<Body> {
   var levelController = TextEditingController();
   var descriptionController = TextEditingController();
   var titleController = TextEditingController();
-  String? priority='low';
+  String? priority = 'low';
   var formKey = GlobalKey<FormState>();
   List<String> names = ["low", "medium", "high"];
   var image;
+  bool? isEditImage = false;
   @override
   void initState() {
+    isEditImage = false;
     TodoAppCubit.get(context).image = null;
+    dateController.text = widget.date!;
+    priority = widget.priority!;
+    descriptionController.text = widget.desc!;
+    levelController.text = widget.status!;
+    titleController.text = widget.title!;
+    image = widget.image;
     super.initState();
     image = TodoAppCubit.get(context).image;
   }
@@ -37,19 +45,40 @@ class _BodyState extends State<Body> {
       builder: (context, state) {
         if (state is ImageCamera || state is ImageGallery) {
           image = TodoAppCubit.get(context).image;
+          isEditImage = true;
         }
         return BlocConsumer<AddTaskCubit, AddTaskState>(
           listener: (context, state) {},
           builder: (context, state) {
             return Column(
               children: [
-                TodoAppCubit.get(context).image == null
+                image == null
                     ? Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 24.h),
+                            InkWell(
+                              onTap: () {
+                                setState(() {});
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    useRootNavigator: false,
+                                    builder: (context) => PickImageDialog());
+                              },
+                              child: Image(
+                                  image: const AssetImage(AppImages.addImage),
+                                  height: 56.h,
+                                  width: 1.sw),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Stack(
+                        alignment: AlignmentDirectional.topEnd,
                         children: [
-                          SizedBox(height: 24.h),
                           InkWell(
                             onTap: () {
                               setState(() {});
@@ -59,32 +88,20 @@ class _BodyState extends State<Body> {
                                   useRootNavigator: false,
                                   builder: (context) => PickImageDialog());
                             },
-                            child: Image(
-                                image: const AssetImage(AppImages.addImage),
-                                height: 56.h,
-                                width: 1.sw),
-                          ),
-                        ],
-                      ),
-                    )
-                    : Stack(
-                        alignment: AlignmentDirectional.topEnd,
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: FileImage(
-                                File(TodoAppCubit.get(context).image!)),
-                            radius: 50.r,
+                            child: CircleAvatar(
+                                backgroundImage: FileImage(File(image!)),
+                                radius: 50.r),
                           ),
                           Positioned(
                               right: -6,
                               child: InkWell(
                                   onTap: () {
                                     setState(() {
-                                      TodoAppCubit.get(context).image =null;
+                                      image = null;
                                     });
-
                                   },
-                                  child: Icon(Icons.delete,color: Colors.red,size: 30.w)))
+                                  child: Icon(Icons.delete,
+                                      color: Colors.red, size: 30.w)))
                         ],
                       ),
                 Form(
@@ -151,7 +168,8 @@ class _BodyState extends State<Body> {
                               flag: 'flag',
                               children: [
                                 ListView.builder(
-                                  shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: names.length,
                                   itemBuilder: (context, index) {
                                     return InkWell(
@@ -209,7 +227,7 @@ class _BodyState extends State<Body> {
                             hint: 'choose due date...',
                             label: 'Due date',
                             validator: (String? value) {
-                              if (dateController.text!.isEmpty) {
+                              if (dateController.text.isEmpty) {
                                 return '⚠️  ${'Please choose due date'}';
                               } else {
                                 return null;
@@ -224,26 +242,38 @@ class _BodyState extends State<Body> {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                state is AddTaskLoading
+                state is EditTaskLoading
                     ? const Center(
                         child: CircularProgressIndicator(
-                            color: ColorManager.backgroundColor),
-                      )
+                            color: ColorManager.backgroundColor))
                     : CustomButton(
-                        text: 'Add task',
+                        text: 'Edit task',
                         function: () {
-                         if(image ==null){
-                           showToast(msg: 'please select image', state: ToastedStates.WARNING);
-                           formKey.currentState!.validate();
-                         }else  if (formKey.currentState!.validate()) {
-                           AddTaskCubit.get(context).addTask(
-                               image,
-                               titleController.text,
-                               descriptionController.text,
-                               priority,
-                               dateController.text,
-                               context);
-                         }
+                          print(isEditImage);
+                          print(image);
+                          // if (image == null) {
+                          //   showToast(
+                          //       msg: 'please select image',
+                          //       state: ToastedStates.WARNING);
+                          //   formKey.currentState!.validate();
+                          // } else
+                          if (formKey.currentState!.validate()) {
+                            isEditImage == true
+                                ? EditTaskCubit.get(context).addImage(
+                                    image,
+                                    titleController.text,
+                                    descriptionController.text,
+                                    priority,
+                                    dateController.text,
+                                    context)
+                                : EditTaskCubit.get(context).editTask(
+                                    image,
+                                    titleController.text,
+                                    descriptionController.text,
+                                    priority,
+                                    dateController.text,
+                                    context);
+                          }
                         }),
                 SizedBox(height: 10.h)
               ],

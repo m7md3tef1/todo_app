@@ -9,7 +9,7 @@ class NetworkFailed extends AddTaskState {
   NetworkFailed(this.msg);
 }
 
-//sign_in
+//add_task
 class AddTaskLoading extends AddTaskState {}
 
 class AddTaskSuccess extends AddTaskState {
@@ -18,4 +18,15 @@ class AddTaskSuccess extends AddTaskState {
 
 class AddTaskFailed extends AddTaskState {
   AddTaskFailed();
+}
+
+//add_image
+class AddImageLoading extends AddTaskState {}
+
+class AddImageSuccess extends AddTaskState {
+  AddImageSuccess();
+}
+
+class AddImageFailed extends AddTaskState {
+  AddImageFailed();
 }

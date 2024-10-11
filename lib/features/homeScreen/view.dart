@@ -10,6 +10,7 @@ import 'package:project/core/widgets/custom_text.dart';
 import 'package:project/features/add_task/view.dart';
 import 'package:project/features/auth/cubit/auth_cubit.dart';
 import 'package:project/features/auth/view/login.dart';
+import 'package:project/features/edit_task/view.dart';
 import 'package:project/features/homeScreen/cubit/tasks_cubit.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:project/features/layout/todo_app_cubit.dart';

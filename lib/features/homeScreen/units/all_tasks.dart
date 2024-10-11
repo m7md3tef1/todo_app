@@ -55,7 +55,7 @@ class _AllTasksState extends State<AllTasks> {
                         _foundUsers[index].desc,
                         _foundUsers[index].createdAt.toString().split('T')[0],
                         _foundUsers[index].priority,
-                        _foundUsers[index].status));
+                        _foundUsers[index].status,_foundUsers[index].id));
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

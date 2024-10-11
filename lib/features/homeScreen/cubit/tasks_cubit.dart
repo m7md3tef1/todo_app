@@ -1,8 +1,15 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:project/core/color_manager/color_manager.dart';
+import 'package:project/core/router/router.dart';
 
 import '../../../core/const/utils.dart';
+import '../../../core/data/api/api.dart';
+import '../../../core/dialoges/toast.dart';
 import '../../../core/models/tasks.dart';
 
 part 'tasks_state.dart';
@@ -47,6 +54,50 @@ class TasksCubit extends Cubit<TasksState> {
           print(ex.error.toString());
           emit(GetTasksFailed(ex.toString()));
         }
+      }
+    });
+  }
+
+  deleteTask(id, context) async {
+    emit(DeleteTaskLoading());
+    connectivity.checkConnectivity().then((value) async {
+      if (ConnectivityResult.none == value) {
+        emit(NetworkFailed("Check your internet connection and try again"));
+        showToast(
+            msg: 'Check your internet connection and try again',
+            state: ToastedStates.WARNING);
+      } else {
+        showDialog(
+            barrierDismissible: false,
+            useRootNavigator: false,
+            context: context,
+            builder: (_) {
+              return Dialog(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  insetPadding: EdgeInsets.symmetric(horizontal: 100.w),
+                  shape: const OutlineInputBorder(
+                      borderRadius: BorderRadius.zero,
+                      borderSide: BorderSide(color: Colors.transparent)),
+                  child: const SpinKitCircle(
+                      color: ColorManager.backgroundColor, size: 70.0));
+            });
+        var response =
+            Api().postHttp(context, url: 'todos/$id', authToken: token);
+        response
+            .then((value) async => {
+                  emit(DeleteTaskSuccess()),
+                  TasksCubit.get(context).pageNumberFilter = 1,
+                  TasksCubit.get(context).listTasks = [],
+                  TasksCubit.get(context).getTasks(context, fromLoading: false),
+                  showToast(
+                      msg: 'Deleted Task Successfully',
+                      state: ToastedStates.SUCCESS),
+                  MagicRouter.pop(),
+                })
+            .onError((error, stackTrace) =>
+                {print(error), MagicRouter.pop(), emit(DeleteTaskFailed())});
       }
     });
   }

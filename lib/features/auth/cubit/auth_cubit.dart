@@ -126,7 +126,7 @@ class AuthCubit extends Cubit<AuthState> {
             state: ToastedStates.WARNING);
       } else {
         var response = Api().postHttpRegister(context,
-            url: 'auth/logout', data: jsonEncode({"token": "${token}"}));
+            url: 'auth/logout', data: jsonEncode({"token": "${refreshToken}"}));
         response
             .then((value) async => {
                   MagicRouter.navigateAndPopAll(TodoAppLogin()),

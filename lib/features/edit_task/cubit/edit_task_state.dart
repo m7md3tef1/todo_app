@@ -9,13 +9,23 @@ class NetworkFailed extends EditTaskState {
   NetworkFailed(this.msg);
 }
 
-//sign_in
-class AddTaskLoading extends EditTaskState {}
+//edit_task
+class EditTaskLoading extends EditTaskState {}
 
-class AddTaskSuccess extends EditTaskState {
-  AddTaskSuccess();
+class EditTaskSuccess extends EditTaskState {
+  EditTaskSuccess();
 }
 
-class AddTaskFailed extends EditTaskState {
-  AddTaskFailed();
+class EditTaskFailed extends EditTaskState {
+  EditTaskFailed();
+}
+//add_image
+class AddImageLoading extends EditTaskState {}
+
+class AddImageSuccess extends EditTaskState {
+  AddImageSuccess();
+}
+
+class AddImageFailed extends EditTaskState {
+  AddImageFailed();
 }

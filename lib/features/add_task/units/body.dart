@@ -13,7 +13,7 @@ class _BodyState extends State<Body> {
   var levelController = TextEditingController();
   var descriptionController = TextEditingController();
   var titleController = TextEditingController();
-  String? priority='low';
+  String? priority = 'low';
   var formKey = GlobalKey<FormState>();
   List<String> names = ["low", "medium", "high"];
   var image;
@@ -39,28 +39,28 @@ class _BodyState extends State<Body> {
               children: [
                 TodoAppCubit.get(context).image == null
                     ? Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(height: 24.h),
-                          InkWell(
-                            onTap: () {
-                              setState(() {});
-                              showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  useRootNavigator: false,
-                                  builder: (context) => PickImageDialog());
-                            },
-                            child: Image(
-                                image: const AssetImage(AppImages.addImage),
-                                height: 56.h,
-                                width: 1.sw),
-                          ),
-                        ],
-                      ),
-                    )
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 24.h),
+                            InkWell(
+                              onTap: () {
+                                setState(() {});
+                                showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    useRootNavigator: false,
+                                    builder: (context) => PickImageDialog());
+                              },
+                              child: Image(
+                                  image: const AssetImage(AppImages.addImage),
+                                  height: 56.h,
+                                  width: 1.sw),
+                            ),
+                          ],
+                        ),
+                      )
                     : Stack(
                         alignment: AlignmentDirectional.topEnd,
                         children: [
@@ -74,11 +74,11 @@ class _BodyState extends State<Body> {
                               child: InkWell(
                                   onTap: () {
                                     setState(() {
-                                      TodoAppCubit.get(context).image =null;
+                                      TodoAppCubit.get(context).image = null;
                                     });
-
                                   },
-                                  child: Icon(Icons.delete,color: Colors.red,size: 30.w)))
+                                  child: Icon(Icons.delete,
+                                      color: Colors.red, size: 30.w)))
                         ],
                       ),
                 Form(
@@ -145,7 +145,8 @@ class _BodyState extends State<Body> {
                               flag: 'flag',
                               children: [
                                 ListView.builder(
-                                  shrinkWrap: true,physics: const NeverScrollableScrollPhysics(),
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemCount: names.length,
                                   itemBuilder: (context, index) {
                                     return InkWell(
@@ -218,7 +219,7 @@ class _BodyState extends State<Body> {
                   ),
                 ),
                 SizedBox(height: 24.h),
-                state is AddTaskLoading
+                state is AddTaskLoading || state is AddImageLoading
                     ? const Center(
                         child: CircularProgressIndicator(
                             color: ColorManager.backgroundColor),
@@ -226,18 +227,20 @@ class _BodyState extends State<Body> {
                     : CustomButton(
                         text: 'Add task',
                         function: () {
-                         if(image ==null){
-                           showToast(msg: 'please select image', state: ToastedStates.WARNING);
-                           formKey.currentState!.validate();
-                         }else  if (formKey.currentState!.validate()) {
-                           AddTaskCubit.get(context).addTask(
-                               image,
-                               titleController.text,
-                               descriptionController.text,
-                               priority,
-                               dateController.text,
-                               context);
-                         }
+                          if (image == null) {
+                            showToast(
+                                msg: 'please select image',
+                                state: ToastedStates.WARNING);
+                            formKey.currentState!.validate();
+                          } else if (formKey.currentState!.validate()) {
+                            AddTaskCubit.get(context).addImage(
+                                image,
+                                titleController.text,
+                                descriptionController.text,
+                                priority,
+                                dateController.text,
+                                context);
+                          }
                         }),
                 SizedBox(height: 10.h)
               ],

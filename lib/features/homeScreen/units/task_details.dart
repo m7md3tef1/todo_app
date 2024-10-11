@@ -1,10 +1,12 @@
 part of '../view.dart';
 
+// ignore: must_be_immutable
 class TaskDetails extends StatefulWidget {
-  TaskDetails(
-      this.title, this.image, this.desc, this.date, this.priority, this.status,
+  TaskDetails(this.title, this.image, this.desc, this.date, this.priority,
+      this.status, this.id,
       {super.key});
   String? title;
+  String? id;
   String? image;
   String? desc;
   String? date;
@@ -34,7 +36,15 @@ class _TaskDetailsState extends State<TaskDetails> {
                       PopupMenuItem(
                           padding: const EdgeInsets.all(5),
                           child: InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                MagicRouter.navigateTo(EditTask(
+                                    widget.title,
+                                    widget.image,
+                                    widget.desc,
+                                    widget.date,
+                                    widget.priority,
+                                    widget.status));
+                              },
                               child: CustomText(
                                   text: 'Edit',
                                   color: Colors.black,
@@ -43,7 +53,10 @@ class _TaskDetailsState extends State<TaskDetails> {
                       PopupMenuItem(
                           padding: const EdgeInsets.all(5),
                           child: InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                TasksCubit.get(context)
+                                    .deleteTask(widget.id, context);
+                              },
                               child: CustomText(
                                   text: 'Delete',
                                   color: const Color(0xFFFF7D53),

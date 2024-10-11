@@ -52,7 +52,7 @@ class AddTask extends StatelessWidget {
                   )),
             ),
             toolbarHeight: 30.h),
-        body: SafeArea(
+        body: const SafeArea(
           child: SingleChildScrollView(
             child: Column(
               children: [
