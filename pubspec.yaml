@@ -55,10 +55,8 @@ dependencies:
   fluttertoast: ^8.2.4
   country_code_picker: ^3.0.0
   easy_localization: ^3.0.7
-
   flutter_launcher_icons: ^0.9.3
-
-
+  flutter_lints: ^3.0.0
 flutter_launcher_icons:
   android: true
   image_path_android: "assets/images/logo.png"
@@ -74,7 +72,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
