@@ -47,7 +47,7 @@ class _BodyState extends State<Body> {
           image = TodoAppCubit.get(context).image;
           isEditImage = true;
         }
-        return BlocConsumer<AddTaskCubit, AddTaskState>(
+        return BlocConsumer<EditTaskCubit, EditTaskState>(
           listener: (context, state) {},
           builder: (context, state) {
             return Column(

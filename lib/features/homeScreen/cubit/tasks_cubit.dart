@@ -95,6 +95,7 @@ class TasksCubit extends Cubit<TasksState> {
                       msg: 'Deleted Task Successfully',
                       state: ToastedStates.SUCCESS),
                   MagicRouter.pop(),
+                  MagicRouter.pop(),
                 })
             .onError((error, stackTrace) =>
                 {print(error), MagicRouter.pop(), emit(DeleteTaskFailed())});
