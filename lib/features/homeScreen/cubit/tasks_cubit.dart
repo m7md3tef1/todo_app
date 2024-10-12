@@ -84,7 +84,7 @@ class TasksCubit extends Cubit<TasksState> {
                       color: ColorManager.backgroundColor, size: 70.0));
             });
         var response =
-            Api().postHttp(context, url: 'todos/$id', authToken: token);
+            Api().deleteHttp(context, url: 'todos/$id', authToken: token);
         response
             .then((value) async => {
                   emit(DeleteTaskSuccess()),
@@ -94,6 +94,7 @@ class TasksCubit extends Cubit<TasksState> {
                   showToast(
                       msg: 'Deleted Task Successfully',
                       state: ToastedStates.SUCCESS),
+                  MagicRouter.pop(),
                   MagicRouter.pop(),
                   MagicRouter.pop(),
                 })
