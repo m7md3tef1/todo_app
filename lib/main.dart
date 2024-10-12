@@ -53,9 +53,9 @@ class MyApp extends StatelessWidget {
                     .copyWith(textScaler: const TextScaler.linear(1.0)),
                 child: MaterialApp(
                     debugShowCheckedModeBanner: false,
-                    localizationsDelegates: context.localizationDelegates,
-                    locale: context.locale,
-                    supportedLocales: context.supportedLocales,
+                    // localizationsDelegates: context.localizationDelegates,
+                    // locale: context.locale,
+                    // supportedLocales: context.supportedLocales,
                     navigatorKey: navigatorKey,
                     home: const SplashScreen()));
           }),
